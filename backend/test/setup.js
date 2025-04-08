@@ -16,7 +16,7 @@ process.env.DB_HOST = 'localhost';
 process.env.DB_USER = 'root';
 process.env.DB_PASSWORD = 'root';
 process.env.DB_NAME = 'users_management_test';
-process.env.DB_PORT = '3307';
+process.env.DB_PORT = '3306';
 process.env.PORT = '5001';
 
 // Configuration de la base de données de test
@@ -25,7 +25,7 @@ export const pool = createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT
+  port: parseInt(process.env.DB_PORT, 10)
 });
 
 // Création d'une connexion à la base de données de test
@@ -36,7 +36,7 @@ export const createTestDbConnection = async () => {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT
+      port: parseInt(process.env.DB_PORT, 10)
     });
 
     // Création de la base de données de test si elle n'existe pas

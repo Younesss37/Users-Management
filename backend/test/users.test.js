@@ -1,4 +1,4 @@
-import { expect, pool } from './setup.js';
+import { expect, pool, createTestDbConnection, cleanTestDb, closeTestDbConnection } from './setup.js';
 import * as chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../src/app.js';
@@ -6,9 +6,18 @@ import app from '../src/app.js';
 chai.use(chaiHttp);
 
 describe('Users API', () => {
+  let connection;
+
+  before(async () => {
+    connection = await createTestDbConnection();
+  });
+
+  after(async () => {
+    await closeTestDbConnection(connection);
+  });
+
   beforeEach(async () => {
-    // Nettoyer la base de données avant chaque test
-    await pool.query('DELETE FROM users');
+    await cleanTestDb(connection);
   });
 
   describe('POST /api/users', () => {
