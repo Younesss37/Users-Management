@@ -14,6 +14,16 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: users_management_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,16 +33,15 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
 
-      - name: Run tests
-        run: |
-          cd backend
-          npm test
+      - name: Run backend tests
+        working-directory: ./backend
+        run: npm test
         env:
           DB_HOST: localhost
           DB_USER: root
