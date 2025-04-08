@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import chaiHttp from 'chai-http';
-import { createPool } from 'mysql2/promise';
+import { createPool, createConnection } from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,15 +9,6 @@ chai.use(chaiHttp);
 
 export const expect = chai.expect;
 export const should = chai.should();
-
-// Configuration de la base de données de test
-export const pool = createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'root',
-  database: process.env.DB_NAME || 'users_management_test',
-  port: process.env.DB_PORT || 3306
-});
 
 // Configuration pour les tests
 process.env.NODE_ENV = 'test';
@@ -28,14 +19,20 @@ process.env.DB_NAME = 'users_management_test';
 process.env.DB_PORT = '3307';
 process.env.PORT = '5001';
 
-// Importation des dépendances
-const mysql = require('mysql2/promise');
+// Configuration de la base de données de test
+export const pool = createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
+});
 
 // Création d'une connexion à la base de données de test
-const createTestDbConnection = async () => {
+export const createTestDbConnection = async () => {
   try {
     // Connexion initiale sans sélectionner de base de données
-    const connection = await mysql.createConnection({
+    const connection = await createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -67,7 +64,7 @@ const createTestDbConnection = async () => {
 };
 
 // Nettoyage de la base de données de test
-const cleanTestDb = async (connection) => {
+export const cleanTestDb = async (connection) => {
   try {
     await connection.query('DELETE FROM users');
     await connection.query('ALTER TABLE users AUTO_INCREMENT = 1');
@@ -78,18 +75,11 @@ const cleanTestDb = async (connection) => {
 };
 
 // Fermeture de la connexion à la base de données
-const closeTestDbConnection = async (connection) => {
+export const closeTestDbConnection = async (connection) => {
   try {
     await connection.end();
   } catch (error) {
     console.error('Error closing test database connection:', error);
     throw error;
   }
-};
-
-module.exports = {
-  expect,
-  createTestDbConnection,
-  cleanTestDb,
-  closeTestDbConnection
 }; 
