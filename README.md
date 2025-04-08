@@ -203,7 +203,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 👥 Auteurs
 
-- Votre Nom - [@Younesss37](https://github.com/Younesss37)
+- Youness Belkhaddar - [@Younesss37](https://github.com/Younesss37)
 
 ## 🙏 Remerciements
 
