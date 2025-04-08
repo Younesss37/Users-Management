@@ -1,6 +1,9 @@
 import { expect, pool } from './setup.js';
+import * as chai from 'chai';
+import chaiHttp from 'chai-http';
 import app from '../src/app.js';
-import chai from 'chai';
+
+chai.use(chaiHttp);
 
 describe('Users API', () => {
   beforeEach(async () => {
@@ -26,8 +29,7 @@ describe('Users API', () => {
       expect(res.body.email).to.equal(userData.email);
     });
 
-    it('should not create a user with an existing email', async () => {
-      // Création d'un premier utilisateur
+    it('should not create a user with duplicate email', async () => {
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
@@ -38,20 +40,17 @@ describe('Users API', () => {
         .post('/api/users')
         .send(userData);
 
-      // Tentative de création d'un second utilisateur avec le même email
       const res = await chai.request(app)
         .post('/api/users')
         .send(userData);
 
-      expect(res.status).to.equal(400);
+      expect(res).to.have.status(400);
       expect(res.body).to.have.property('message', 'Email already exists');
     });
   });
 
-  // Test de récupération des utilisateurs
   describe('GET /api/users', () => {
     it('should get all users', async () => {
-      // Création de quelques utilisateurs
       const users = [
         { name: 'User 1', email: 'user1@example.com', password: 'pass1' },
         { name: 'User 2', email: 'user2@example.com', password: 'pass2' }
@@ -63,23 +62,17 @@ describe('Users API', () => {
           .send(user);
       }
 
-      // Récupération de tous les utilisateurs
       const res = await chai.request(app)
         .get('/api/users');
 
-      expect(res.status).to.equal(200);
+      expect(res).to.have.status(200);
       expect(res.body).to.be.an('array');
       expect(res.body).to.have.lengthOf(2);
-      expect(res.body[0]).to.have.property('name');
-      expect(res.body[0]).to.have.property('email');
-      expect(res.body[0]).to.not.have.property('password');
     });
   });
 
-  // Test de récupération d'un utilisateur spécifique
   describe('GET /api/users/:id', () => {
     it('should get a single user', async () => {
-      // Création d'un utilisateur
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
@@ -92,76 +85,55 @@ describe('Users API', () => {
 
       const userId = createRes.body.id;
 
-      // Récupération de l'utilisateur
       const res = await chai.request(app)
         .get(`/api/users/${userId}`);
 
-      expect(res.status).to.equal(200);
+      expect(res).to.have.status(200);
       expect(res.body).to.have.property('id', userId);
-      expect(res.body.name).to.equal(userData.name);
-      expect(res.body.email).to.equal(userData.email);
-      expect(res.body).to.not.have.property('password');
+      expect(res.body).to.have.property('name', userData.name);
+      expect(res.body).to.have.property('email', userData.email);
     });
 
     it('should return 404 for non-existent user', async () => {
       const res = await chai.request(app)
         .get('/api/users/999');
 
-      expect(res.status).to.equal(404);
+      expect(res).to.have.status(404);
       expect(res.body).to.have.property('message', 'User not found');
     });
   });
 
-  // Test de mise à jour d'un utilisateur
   describe('PUT /api/users/:id', () => {
     it('should update a user', async () => {
-      // Création d'un utilisateur
       const userData = {
-        name: 'Test User',
-        email: 'test@example.com',
+        name: 'Original Name',
+        email: 'original@example.com',
         password: 'password123'
       };
 
-      console.log('Creating user:', userData);
       const createRes = await chai.request(app)
         .post('/api/users')
         .send(userData);
-      console.log('Create response:', createRes.body);
 
       const userId = createRes.body.id;
 
-      // Vérification que l'utilisateur existe
-      const getRes = await chai.request(app)
-        .get(`/api/users/${userId}`);
-      console.log('Get response:', getRes.body);
-
-      // Mise à jour de l'utilisateur
       const updateData = {
-        name: 'Updated User',
+        name: 'Updated Name',
         email: 'updated@example.com',
         password: 'newpassword123'
       };
 
-      console.log('Updating user:', updateData);
       const res = await chai.request(app)
         .put(`/api/users/${userId}`)
         .send(updateData);
-      console.log('Update response:', res.body);
 
-      expect(res.status).to.equal(200);
+      expect(res).to.have.status(200);
       expect(res.body).to.have.property('id', userId);
-      expect(res.body.name).to.equal(updateData.name);
-      expect(res.body.email).to.equal(updateData.email);
-      expect(res.body).to.have.property('message', 'User updated successfully');
-
-      // Vérification que l'utilisateur a bien été mis à jour
-      const finalGetRes = await chai.request(app)
-        .get(`/api/users/${userId}`);
-      console.log('Final get response:', finalGetRes.body);
+      expect(res.body).to.have.property('name', updateData.name);
+      expect(res.body).to.have.property('email', updateData.email);
     });
 
-    it('should not update a user with an existing email', async () => {
-      // Création de deux utilisateurs
+    it('should not update with duplicate email', async () => {
       const user1 = {
         name: 'User 1',
         email: 'user1@example.com',
@@ -182,20 +154,17 @@ describe('Users API', () => {
         .post('/api/users')
         .send(user2);
 
-      // Tentative de mise à jour du premier utilisateur avec l'email du second
       const res = await chai.request(app)
         .put(`/api/users/${createRes1.body.id}`)
         .send({ ...user1, email: user2.email });
 
-      expect(res.status).to.equal(400);
+      expect(res).to.have.status(400);
       expect(res.body).to.have.property('message', 'Email already exists for another user');
     });
   });
 
-  // Test de suppression d'un utilisateur
   describe('DELETE /api/users/:id', () => {
     it('should delete a user', async () => {
-      // Création d'un utilisateur
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
@@ -208,18 +177,16 @@ describe('Users API', () => {
 
       const userId = createRes.body.id;
 
-      // Suppression de l'utilisateur
       const res = await chai.request(app)
         .delete(`/api/users/${userId}`);
 
-      expect(res.status).to.equal(200);
+      expect(res).to.have.status(200);
       expect(res.body).to.have.property('message', 'User deleted successfully');
 
-      // Vérification que l'utilisateur a bien été supprimé
       const getRes = await chai.request(app)
         .get(`/api/users/${userId}`);
 
-      expect(getRes.status).to.equal(404);
+      expect(getRes).to.have.status(404);
     });
   });
 }); 

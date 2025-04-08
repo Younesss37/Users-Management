@@ -1,4 +1,4 @@
-import chai from 'chai';
+import * as chai from 'chai';
 import chaiHttp from 'chai-http';
 import { createPool } from 'mysql2/promise';
 import dotenv from 'dotenv';

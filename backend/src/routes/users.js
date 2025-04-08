@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const router = express.Router();
+const router = express.Router();
 
 const pool = createPool({
   host: process.env.DB_HOST,
@@ -133,4 +133,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 
