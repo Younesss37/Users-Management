@@ -1,13 +1,15 @@
 {
   "name": "users-management-backend",
   "version": "1.0.0",
-  "description": "Backend API for users management",
+  "type": "module",
+  "description": "Backend API for Users Management",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test": "mocha --timeout 10000 test/**/*.test.js",
-    "test:coverage": "nyc --reporter=text --reporter=html mocha --timeout 10000 test/**/*.test.js"
+    "test:coverage": "nyc --reporter=text --reporter=html mocha --timeout 10000 test/**/*.test.js",
+    "init-db": "node src/db/init.js"
   },
   "keywords": [],
   "author": "",

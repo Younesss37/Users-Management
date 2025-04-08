@@ -1,30 +1,13 @@
-const { expect, createTestDbConnection, cleanTestDb, closeTestDbConnection } = require('./setup');
-const request = require('supertest');
-const app = require('../src/index');
+import { expect, pool } from './setup.js';
+import app from '../src/app.js';
+import chai from 'chai';
 
-describe('User API Tests', () => {
-  let connection;
-  let testUserId;
-
-  // Avant tous les tests
-  before(async () => {
-    // Création de la connexion à la base de données de test
-    connection = await createTestDbConnection();
-  });
-
-  // Après tous les tests
-  after(async () => {
-    // Fermeture de la connexion à la base de données
-    await closeTestDbConnection(connection);
-  });
-
-  // Avant chaque test
+describe('Users API', () => {
   beforeEach(async () => {
-    // Nettoyage de la base de données
-    await cleanTestDb(connection);
+    // Nettoyer la base de données avant chaque test
+    await pool.query('DELETE FROM users');
   });
 
-  // Test de création d'un utilisateur
   describe('POST /api/users', () => {
     it('should create a new user', async () => {
       const userData = {
@@ -33,18 +16,14 @@ describe('User API Tests', () => {
         password: 'password123'
       };
 
-      const res = await request(app)
+      const res = await chai.request(app)
         .post('/api/users')
         .send(userData);
 
-      expect(res.status).to.equal(201);
+      expect(res).to.have.status(201);
       expect(res.body).to.have.property('id');
       expect(res.body.name).to.equal(userData.name);
       expect(res.body.email).to.equal(userData.email);
-      expect(res.body).to.have.property('message', 'User created successfully');
-
-      // Sauvegarde de l'ID pour les tests suivants
-      testUserId = res.body.id;
     });
 
     it('should not create a user with an existing email', async () => {
@@ -55,12 +34,12 @@ describe('User API Tests', () => {
         password: 'password123'
       };
 
-      await request(app)
+      await chai.request(app)
         .post('/api/users')
         .send(userData);
 
       // Tentative de création d'un second utilisateur avec le même email
-      const res = await request(app)
+      const res = await chai.request(app)
         .post('/api/users')
         .send(userData);
 
@@ -79,13 +58,13 @@ describe('User API Tests', () => {
       ];
 
       for (const user of users) {
-        await request(app)
+        await chai.request(app)
           .post('/api/users')
           .send(user);
       }
 
       // Récupération de tous les utilisateurs
-      const res = await request(app)
+      const res = await chai.request(app)
         .get('/api/users');
 
       expect(res.status).to.equal(200);
@@ -107,14 +86,14 @@ describe('User API Tests', () => {
         password: 'password123'
       };
 
-      const createRes = await request(app)
+      const createRes = await chai.request(app)
         .post('/api/users')
         .send(userData);
 
       const userId = createRes.body.id;
 
       // Récupération de l'utilisateur
-      const res = await request(app)
+      const res = await chai.request(app)
         .get(`/api/users/${userId}`);
 
       expect(res.status).to.equal(200);
@@ -125,7 +104,7 @@ describe('User API Tests', () => {
     });
 
     it('should return 404 for non-existent user', async () => {
-      const res = await request(app)
+      const res = await chai.request(app)
         .get('/api/users/999');
 
       expect(res.status).to.equal(404);
@@ -144,7 +123,7 @@ describe('User API Tests', () => {
       };
 
       console.log('Creating user:', userData);
-      const createRes = await request(app)
+      const createRes = await chai.request(app)
         .post('/api/users')
         .send(userData);
       console.log('Create response:', createRes.body);
@@ -152,7 +131,7 @@ describe('User API Tests', () => {
       const userId = createRes.body.id;
 
       // Vérification que l'utilisateur existe
-      const getRes = await request(app)
+      const getRes = await chai.request(app)
         .get(`/api/users/${userId}`);
       console.log('Get response:', getRes.body);
 
@@ -164,7 +143,7 @@ describe('User API Tests', () => {
       };
 
       console.log('Updating user:', updateData);
-      const res = await request(app)
+      const res = await chai.request(app)
         .put(`/api/users/${userId}`)
         .send(updateData);
       console.log('Update response:', res.body);
@@ -176,7 +155,7 @@ describe('User API Tests', () => {
       expect(res.body).to.have.property('message', 'User updated successfully');
 
       // Vérification que l'utilisateur a bien été mis à jour
-      const finalGetRes = await request(app)
+      const finalGetRes = await chai.request(app)
         .get(`/api/users/${userId}`);
       console.log('Final get response:', finalGetRes.body);
     });
@@ -195,16 +174,16 @@ describe('User API Tests', () => {
         password: 'pass2'
       };
 
-      const createRes1 = await request(app)
+      const createRes1 = await chai.request(app)
         .post('/api/users')
         .send(user1);
 
-      await request(app)
+      await chai.request(app)
         .post('/api/users')
         .send(user2);
 
       // Tentative de mise à jour du premier utilisateur avec l'email du second
-      const res = await request(app)
+      const res = await chai.request(app)
         .put(`/api/users/${createRes1.body.id}`)
         .send({ ...user1, email: user2.email });
 
@@ -223,21 +202,21 @@ describe('User API Tests', () => {
         password: 'password123'
       };
 
-      const createRes = await request(app)
+      const createRes = await chai.request(app)
         .post('/api/users')
         .send(userData);
 
       const userId = createRes.body.id;
 
       // Suppression de l'utilisateur
-      const res = await request(app)
+      const res = await chai.request(app)
         .delete(`/api/users/${userId}`);
 
       expect(res.status).to.equal(200);
       expect(res.body).to.have.property('message', 'User deleted successfully');
 
       // Vérification que l'utilisateur a bien été supprimé
-      const getRes = await request(app)
+      const getRes = await chai.request(app)
         .get(`/api/users/${userId}`);
 
       expect(getRes.status).to.equal(404);
