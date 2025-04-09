@@ -1,15 +1,11 @@
-import chai from 'chai';
-import chaiHttp from 'chai-http';
-import { createPool, createConnection } from 'mysql2/promise';
-import dotenv from 'dotenv';
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const { createPool, createConnection } = require('mysql2/promise');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
 chai.use(chaiHttp);
-
-export const expect = chai.expect;
-export const request = chai.request;
-export const should = chai.should();
 
 // Configuration pour les tests
 process.env.NODE_ENV = 'test';
@@ -21,7 +17,7 @@ process.env.DB_PORT = '3306';
 process.env.PORT = '5001';
 
 // Configuration de la base de données de test
-export const pool = createPool({
+const pool = createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -30,7 +26,7 @@ export const pool = createPool({
 });
 
 // Création d'une connexion à la base de données de test
-export const createTestDbConnection = async () => {
+const createTestDbConnection = async () => {
   try {
     // Connexion initiale sans sélectionner de base de données
     const connection = await createConnection({
@@ -65,7 +61,7 @@ export const createTestDbConnection = async () => {
 };
 
 // Nettoyage de la base de données de test
-export const cleanTestDb = async (connection) => {
+const cleanTestDb = async (connection) => {
   try {
     await connection.query('DELETE FROM users');
     await connection.query('ALTER TABLE users AUTO_INCREMENT = 1');
@@ -76,11 +72,21 @@ export const cleanTestDb = async (connection) => {
 };
 
 // Fermeture de la connexion à la base de données
-export const closeTestDbConnection = async (connection) => {
+const closeTestDbConnection = async (connection) => {
   try {
     await connection.end();
   } catch (error) {
     console.error('Error closing test database connection:', error);
     throw error;
   }
+};
+
+module.exports = {
+  expect: chai.expect,
+  request: chai.request,
+  should: chai.should(),
+  pool,
+  createTestDbConnection,
+  cleanTestDb,
+  closeTestDbConnection
 }; 

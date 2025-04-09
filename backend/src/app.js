@@ -1,6 +1,6 @@
-import express from 'express';
-import cors from 'cors';
-import usersRouter from './routes/users.js';
+const express = require('express');
+const cors = require('cors');
+const usersRouter = require('./routes/users');
 
 const app = express();
 
@@ -17,4 +17,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
-export default app; 
+module.exports = app; 

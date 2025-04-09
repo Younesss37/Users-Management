@@ -1,5 +1,5 @@
-import { expect, request, createTestDbConnection, cleanTestDb, closeTestDbConnection } from './setup.js';
-import app from '../src/app.js';
+const { expect, request, createTestDbConnection, cleanTestDb, closeTestDbConnection } = require('./setup');
+const app = require('../src/app');
 
 describe('Users API', () => {
   let connection;
