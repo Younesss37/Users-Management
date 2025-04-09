@@ -1,6 +1,6 @@
-import express from 'express';
-import { createPool } from 'mysql2/promise';
-import dotenv from 'dotenv';
+const express = require('express');
+const { createPool } = require('mysql2/promise');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -133,4 +133,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router; 
+module.exports = router; 
