@@ -81,6 +81,23 @@ const closeTestDbConnection = async (connection) => {
   }
 };
 
+// Fermeture du pool de connexions
+const closePool = async () => {
+  try {
+    await pool.end();
+  } catch (error) {
+    console.error('Error closing connection pool:', error);
+    throw error;
+  }
+};
+
+// Nettoyage après tous les tests
+after(async () => {
+  await closePool();
+  // Force process to exit after cleanup
+  process.exit(0);
+});
+
 module.exports = {
   expect: chai.expect,
   request: chai.request,
@@ -88,5 +105,6 @@ module.exports = {
   pool,
   createTestDbConnection,
   cleanTestDb,
-  closeTestDbConnection
+  closeTestDbConnection,
+  closePool
 }; 
