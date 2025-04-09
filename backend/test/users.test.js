@@ -1,9 +1,5 @@
-import { expect, pool, createTestDbConnection, cleanTestDb, closeTestDbConnection } from './setup.js';
-import * as chai from 'chai';
-import chaiHttp from 'chai-http';
+import { expect, request, createTestDbConnection, cleanTestDb, closeTestDbConnection } from './setup.js';
 import app from '../src/app.js';
-
-chai.use(chaiHttp);
 
 describe('Users API', () => {
   let connection;
@@ -28,7 +24,7 @@ describe('Users API', () => {
         password: 'password123'
       };
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .post('/api/users')
         .send(userData);
 
@@ -45,11 +41,11 @@ describe('Users API', () => {
         password: 'password123'
       };
 
-      await chai.request(app)
+      await request(app)
         .post('/api/users')
         .send(userData);
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .post('/api/users')
         .send(userData);
 
@@ -66,12 +62,12 @@ describe('Users API', () => {
       ];
 
       for (const user of users) {
-        await chai.request(app)
+        await request(app)
           .post('/api/users')
           .send(user);
       }
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .get('/api/users');
 
       expect(res).to.have.status(200);
@@ -88,13 +84,13 @@ describe('Users API', () => {
         password: 'password123'
       };
 
-      const createRes = await chai.request(app)
+      const createRes = await request(app)
         .post('/api/users')
         .send(userData);
 
       const userId = createRes.body.id;
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .get(`/api/users/${userId}`);
 
       expect(res).to.have.status(200);
@@ -104,7 +100,7 @@ describe('Users API', () => {
     });
 
     it('should return 404 for non-existent user', async () => {
-      const res = await chai.request(app)
+      const res = await request(app)
         .get('/api/users/999');
 
       expect(res).to.have.status(404);
@@ -120,7 +116,7 @@ describe('Users API', () => {
         password: 'password123'
       };
 
-      const createRes = await chai.request(app)
+      const createRes = await request(app)
         .post('/api/users')
         .send(userData);
 
@@ -132,7 +128,7 @@ describe('Users API', () => {
         password: 'newpassword123'
       };
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .put(`/api/users/${userId}`)
         .send(updateData);
 
@@ -155,15 +151,15 @@ describe('Users API', () => {
         password: 'pass2'
       };
 
-      const createRes1 = await chai.request(app)
+      const createRes1 = await request(app)
         .post('/api/users')
         .send(user1);
 
-      await chai.request(app)
+      await request(app)
         .post('/api/users')
         .send(user2);
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .put(`/api/users/${createRes1.body.id}`)
         .send({ ...user1, email: user2.email });
 
@@ -180,19 +176,19 @@ describe('Users API', () => {
         password: 'password123'
       };
 
-      const createRes = await chai.request(app)
+      const createRes = await request(app)
         .post('/api/users')
         .send(userData);
 
       const userId = createRes.body.id;
 
-      const res = await chai.request(app)
+      const res = await request(app)
         .delete(`/api/users/${userId}`);
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property('message', 'User deleted successfully');
 
-      const getRes = await chai.request(app)
+      const getRes = await request(app)
         .get(`/api/users/${userId}`);
 
       expect(getRes).to.have.status(404);

@@ -1,4 +1,4 @@
-import * as chai from 'chai';
+import chai from 'chai';
 import chaiHttp from 'chai-http';
 import { createPool, createConnection } from 'mysql2/promise';
 import dotenv from 'dotenv';
@@ -8,6 +8,7 @@ dotenv.config();
 chai.use(chaiHttp);
 
 export const expect = chai.expect;
+export const request = chai.request;
 export const should = chai.should();
 
 // Configuration pour les tests
